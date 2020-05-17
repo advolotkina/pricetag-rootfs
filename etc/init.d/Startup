@@ -1,0 +1,13 @@
+#!/bin/sh
+modprobe esp8089.ko
+ifconfig wlan0 up
+wpa_supplicant -B -i wlan0 -c /etc/wpa_supplicant.conf
+udhcpc -i wlan0
+setsid /opt/server-daemon >/dev/null 2>&1 < /dev/null &
+TSLIB_FBDEVICE=/dev/fb0 TSLIB_TSDEVICE=/dev/input/event0 TSLIB_CALIBFILE=/usr/local/etc/pointercal TSLIB_CONFFILE=/etc/ts.conf TSLIB_PLUGINDIR=/usr/lib/ts ts_uinput -v -d -n /dev/input/event1
+echo 0 > /sys/class/graphics/fbcon/cursor_blink
+setsid /opt/demo >/dev/null 2>&1 < /dev/null &
+mkdir -p /var/spool/cron/crontabs
+cp /opt/root /var/spool/cron/crontabs/root
+crond
+
